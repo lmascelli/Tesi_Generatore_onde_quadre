@@ -35,6 +35,8 @@ double start_time, current_time;
 
 unsigned int decimals = 0, units = 0, tens  = 0, hundreds = 0;
 bool buttons[4] = {false};
+float buttons_timer_start[4] = {0.0f};
+float buttons_timer_pressed[4] = {0.0f};
 
 bool need_render = true;
 
@@ -78,8 +80,11 @@ inline void create_from_digits(float *num) {
   *num = 100 * hundreds + 10 * tens + units + 0.1f * decimals;
 }
 
+#define PRESSED_THRESHOLD 25
+#define CHECK_BTN(X) (buttons_timer_start[X] - buttons_timer_pressed[X] > PRESSED_THRESHOLD)
+
 inline bool compare_buttons(bool b0, bool b1, bool b2, bool b3) {
-  return (buttons[0] == b0 && buttons[1] == b2 && buttons[2] == b2 && buttons[3] == b3);
+  return (CHECK_BTN(0) == b0 && CHECK_BTN(1) == b1 && CHECK_BTN(2) == b2 && CHECK_BTN(3) == b3);
 }
 
 inline void change_digit(unsigned int *num, bool decrease) {
@@ -108,7 +113,6 @@ void setup() {
   lcd.begin(20, 4);
   start_time = GET_TIME();
 
-
   pinMode(OUTPUT_PIN, OUTPUT);
   pinMode(PIN_RIGHT, INPUT);
   digitalWrite(OUTPUT_PIN, LOW);
@@ -118,18 +122,46 @@ void loop() {
   // manage input
   // TODO check if some waiting time is needed for multiple buttons handling
   {
-    if (digitalRead(PIN_UP) == HIGH)
+    if (digitalRead(PIN_UP) == HIGH && !buttons[0]){
       buttons[0] = true;
-    else buttons[0] = false;
-    if (digitalRead(PIN_DOWN) == HIGH)
+      buttons_timer_start[0] = GET_TIME();
+    } else if (digitalRead(PIN_UP) == HIGH && buttons[0]){
+      buttons_timer_pressed[0] = GET_TIME();
+    }
+    else { 
+      buttons[0] = false;
+      buttons_timer_start[0] = buttons_timer_pressed[0] = 0.0f;
+    }
+    if (digitalRead(PIN_DOWN) == HIGH && !buttons[1]){
       buttons[1] = true;
-    else buttons[1] = false;
-    if (digitalRead(PIN_LEFT) == HIGH)
+      buttons_timer_start[1] = GET_TIME();
+    } else if (digitalRead(PIN_DOWN) == HIGH && buttons[1]){
+      buttons_timer_pressed[1] = GET_TIME();
+    }
+    else { 
+      buttons[1] = false;
+      buttons_timer_start[1] = buttons_timer_pressed[1] = 0.0f;
+    }
+    if (digitalRead(PIN_LEFT) == HIGH && !buttons[2]){
       buttons[2] = true;
-    else buttons[2] = false;
-    if (digitalRead(PIN_RIGHT) == HIGH)
+      buttons_timer_start[2] = GET_TIME();
+    } else if (digitalRead(PIN_LEFT) == HIGH && buttons[2]){
+      buttons_timer_pressed[2] = GET_TIME();
+    }
+    else { 
+      buttons[2] = false;
+      buttons_timer_start[2] = buttons_timer_pressed[2] = 0.0f;
+    }
+    if (digitalRead(PIN_RIGHT) == HIGH && !buttons[3]){
       buttons[3] = true;
-    else buttons[3] = false;
+      buttons_timer_start[3] = GET_TIME();
+    } else if (digitalRead(PIN_RIGHT) == HIGH && buttons[3]){
+      buttons_timer_pressed[3] = GET_TIME();
+    }
+    else { 
+      buttons[3] = false;
+      buttons_timer_start[3] = buttons_timer_pressed[3] = 0.0f;
+    }
   }
 
   // manage state
@@ -138,7 +170,7 @@ void loop() {
       {
         if (compare_buttons(false, false, false, true)) {
           change_state(PLAY);
-        } else if (compare_buttons(true, false, false, false)) {
+        } else if (compare_buttons(false, true, false, false)) {
           change_state(MENU_FREQ);
         }
         break;
@@ -409,11 +441,93 @@ void loop() {
           lcd.print("_");
           break;
       }
-      case CHANGE_DIGIT:
-        {
-          lcd.print("Change Digit");
+      case MENU_DUTY_CYCLE:
+      {
+          lcd.print("Duty Cycle");
+          lcd.setCursor(0, 2);
+          lcd.print(duty_cycle);
           break;
-        }
+      }
+      case MENU_DUTY_CYCLE_0:
+      {
+          lcd.print("Duty Cycle");
+          lcd.setCursor(0, 2);
+          lcd.print(duty_cycle);
+          lcd.setCursor(0, 3);
+          lcd.print("_");
+          break;
+      }
+      case MENU_DUTY_CYCLE_1:
+      {
+          lcd.print("Duty Cycle");
+          lcd.setCursor(0, 2);
+          lcd.print(duty_cycle);
+          lcd.setCursor(1, 3);
+          lcd.print("_");
+          break;
+      }
+      case MENU_DUTY_CYCLE_2:
+      {
+          lcd.print("Duty Cycle");
+          lcd.setCursor(0, 2);
+          lcd.print(duty_cycle);
+          lcd.setCursor(2, 3);
+          lcd.print("_");
+          break;
+      }
+      case MENU_DUTY_CYCLE_3:
+        {
+          lcd.print("Duty_cycle");
+          lcd.setCursor(0, 2);
+          lcd.print(duty_cycle);
+          lcd.setCursor(3, 3);
+          lcd.print("_");
+          break;
+      }
+      case MENU_REPETITIONS:
+      {
+          lcd.print("Repetitions");
+          lcd.setCursor(0, 2);
+          lcd.print(repetitions);
+          break;
+      }
+      case MENU_REPETITIONS_0:
+      {
+          lcd.print("Repetitions");
+          lcd.setCursor(0, 2);
+          lcd.print(repetitions);
+          lcd.setCursor(0, 3);
+          lcd.print("_");
+          break;
+      }
+      case MENU_REPETITIONS_1:
+      {
+          lcd.print("Repetitions");
+          lcd.setCursor(0, 2);
+          lcd.print(repetitions);
+          lcd.setCursor(1, 3);
+          lcd.print("_");
+          break;
+      }
+      case MENU_REPETITIONS_2:
+      {
+          lcd.print("Repetitions");
+          lcd.setCursor(0, 2);
+          lcd.print(repetitions);
+          lcd.setCursor(2, 3);
+          lcd.print("_");
+          break;
+      }
+      case MENU_REPETITIONS_3:
+        {
+          lcd.print("Repetitions");
+          lcd.setCursor(0, 2);
+          lcd.print(repetitions);
+          lcd.setCursor(3, 3);
+          lcd.print("_");
+          break;
+      }
+      
       default:
         break;
     }
