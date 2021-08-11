@@ -19,10 +19,10 @@
 #define REPETITIONS 2
 
 
-// #define I2C
+#define I2C
 #ifdef I2C
-// #include <LiquidCrystal_I2C.h>
-// LiquidCrystal_I2C lcd(0x27, 20, 4);
+#include <LiquidCrystal_I2C.h>
+LiquidCrystal_I2C lcd(0x27, 20, 4);
 #else
 #include <LiquidCrystal.h>
 LiquidCrystal lcd(0, 0, 0, 0, 0, 0);
@@ -35,6 +35,8 @@ double start_time, current_time;
 
 unsigned int decimals = 0, units = 0, tens  = 0, hundreds = 0;
 bool buttons[4] = {false};
+
+bool need_render = true;
 
 enum STATE {
   PLAY,
@@ -89,11 +91,11 @@ inline void change_digit(unsigned int *num, bool decrease) {
     if (*num == 0) *num = 9;
     else *num--;
   }
-  lcd.clear();
+  need_render = true;
 }
 
 inline void change_state(STATE state) {
-  lcd.clear();
+  need_render = true;
   current_state = state;
 }
 
@@ -351,6 +353,8 @@ void loop() {
 
   // render to display
   {
+    if (need_render){
+      lcd.clear();
     switch (current_state) {
       case STOP:
         {
@@ -362,14 +366,49 @@ void loop() {
           lcd.print("ACTIVE");
           break;
         }
+      case MENU_FREQ:
+      {
+          lcd.print("Frequency");
+          lcd.setCursor(0, 2);
+          lcd.print(frequency);
+          break;
+      }
       case MENU_FREQ_0:
+      {
+          lcd.print("Frequency");
+          lcd.setCursor(0, 2);
+          lcd.print(frequency);
+          lcd.setCursor(0, 3);
+          lcd.print("_");
+          break;
+      }
       case MENU_FREQ_1:
+      {
+          lcd.print("Frequency");
+          lcd.setCursor(0, 2);
+          lcd.print(frequency);
+          lcd.setCursor(1, 3);
+          lcd.print("_");
+          break;
+      }
       case MENU_FREQ_2:
+      {
+          lcd.print("Frequency");
+          lcd.setCursor(0, 2);
+          lcd.print(frequency);
+          lcd.setCursor(2, 3);
+          lcd.print("_");
+          break;
+      }
       case MENU_FREQ_3:
         {
           lcd.print("Frequency");
+          lcd.setCursor(0, 2);
+          lcd.print(frequency);
+          lcd.setCursor(3, 3);
+          lcd.print("_");
           break;
-        }
+      }
       case CHANGE_DIGIT:
         {
           lcd.print("Change Digit");
@@ -379,4 +418,6 @@ void loop() {
         break;
     }
   }
+  }
+  need_render = false;
 }
