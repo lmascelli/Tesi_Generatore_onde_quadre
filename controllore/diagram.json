@@ -22,8 +22,8 @@
         {
             "type": "wokwi-pushbutton",
             "id": "btn1",
-            "top": 262.31,
-            "left": 177.45,
+            "top": 231.47,
+            "left": 292.17,
             "attrs": {
                 "color": "green"
             }
@@ -31,8 +31,8 @@
         {
             "type": "wokwi-pushbutton",
             "id": "btn2",
-            "top": 261.34,
-            "left": 316.63,
+            "top": 237.9,
+            "left": 505.36,
             "attrs": {
                 "color": "green"
             }
@@ -40,8 +40,8 @@
         {
             "type": "wokwi-pushbutton",
             "id": "btn3",
-            "top": 329.47,
-            "left": 248.49,
+            "top": 391.15,
+            "left": 387.88,
             "attrs": {
                 "color": "green"
             }
@@ -49,8 +49,8 @@
         {
             "type": "wokwi-pushbutton",
             "id": "btn4",
-            "top": 191.26,
-            "left": 247.53,
+            "top": 54.34,
+            "left": 401.72,
             "attrs": {
                 "color": "green"
             }
@@ -58,11 +58,39 @@
         {
             "type": "wokwi-lcd2004",
             "id": "lcd1",
-            "top": -81.89,
-            "left": 48.43,
+            "top": -245.52,
+            "left": 57.63,
             "attrs": {
                 "pins": "i2c"
             }
+        },
+        {
+            "type": "wokwi-resistor",
+            "id": "r1",
+            "top": 116.41,
+            "left": 113.85,
+            "attrs": {}
+        },
+        {
+            "type": "wokwi-resistor",
+            "id": "r2",
+            "top": 409.16,
+            "left": 90.5,
+            "attrs": {}
+        },
+        {
+            "type": "wokwi-resistor",
+            "id": "r3",
+            "top": 171.4,
+            "left": 195.05,
+            "attrs": {}
+        },
+        {
+            "type": "wokwi-resistor",
+            "id": "r4",
+            "top": 205.94,
+            "left": 431.88,
+            "attrs": {}
         }
     ],
     "connections": [
@@ -115,38 +143,6 @@
             ]
         ],
         [
-            "btn4:1.l",
-            "uno:12",
-            "green",
-            [
-                "h0"
-            ]
-        ],
-        [
-            "btn3:1.l",
-            "uno:11",
-            "green",
-            [
-                "h0"
-            ]
-        ],
-        [
-            "btn1:1.l",
-            "uno:10",
-            "green",
-            [
-                "h0"
-            ]
-        ],
-        [
-            "btn2:1.l",
-            "uno:9",
-            "green",
-            [
-                "h0"
-            ]
-        ],
-        [
             "btn4:2.l",
             "uno:5V",
             "green",
@@ -176,6 +172,102 @@
             "green",
             [
                 "h0"
+            ]
+        ],
+        [
+            "r1:1",
+            "uno:GND.1",
+            "green",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "r1:2",
+            "uno:12",
+            "green",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "r1:2",
+            "btn4:1.l",
+            "green",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "uno:GND.3",
+            "r2:1",
+            "black",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "r2:2",
+            "uno:11",
+            "green",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "btn3:1.l",
+            "r2:2",
+            "green",
+            [
+                "h0"
+            ]
+        ],
+        [
+            "r3:1",
+            "uno:GND.1",
+            "green",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "r3:2",
+            "uno:10",
+            "green",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "r3:2",
+            "btn1:1.l",
+            "green",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "r4:1",
+            "uno:GND.1",
+            "green",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "r4:2",
+            "uno:9",
+            "green",
+            [
+                "v0"
+            ]
+        ],
+        [
+            "r4:2",
+            "btn2:1.l",
+            "green",
+            [
+                "v0"
             ]
         ]
     ]
