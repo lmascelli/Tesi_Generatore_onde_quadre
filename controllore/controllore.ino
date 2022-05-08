@@ -109,6 +109,7 @@ void print(const char *text, int row = 0, int col = 0)
   if (need_render)
   {
     lcd.clear();
+    lcd.setCursor(row, col);
     lcd.print(text);
     need_render = false;
   }
