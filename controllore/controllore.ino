@@ -168,10 +168,12 @@ struct State
 
 State *current_state;
 
-State *state_reset;
-State *state_ready;
-State *state_set_menu;
-State *state_run_menu;
+void state_create(struct State **state, void (*update_func)(void), bool input_enable = false)
+{
+  (*state) = (State *)malloc(sizeof(State));
+  (*state)->update = update_func;
+  (*state)->input_enable = input_enable;
+}
 
 void change_state(struct State *state)
 {
@@ -202,11 +204,45 @@ void render_digits(float num_to_render)
   lcd.print(decimals);
 }
 
+State *state_reset;
+State *state_ready;
+State *state_set_menu;
+State *state_run_menu;
+
+// STATE RESET
+
+void state_reset_update()
+{
+  print("RESET");
+  delay(1000);
+  change_state(state_ready);
+};
+
+// STATE READY
+
+void state_ready_update()
+{
+  print("READY");
+}
+
+// state_create(&state_reset, state_reset_update, true);
+
+/****************************************
+ *
+ * MAIN SETUP AND LOOP
+ *
+ ****************************************/
+
 void setup()
 {
   frequency = 1.0f;
   duty_cycle = 0.5f;
   repetitions = 10;
+
+  state_create(&state_reset, state_reset_update, true);
+  state_create(&state_ready, state_ready_update, true);
+
+  change_state(state_reset);
 }
 
 void loop()
