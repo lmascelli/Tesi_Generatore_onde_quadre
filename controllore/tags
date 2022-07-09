@@ -1,0 +1,86 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_EXCMD	mixed	/number, pattern, mixed, or combineV2/
+!_TAG_OUTPUT_FILESEP	slash	/slash or backslash/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PATTERN_LENGTH_LIMIT	96	/0 for no limit/
+!_TAG_PROC_CWD	D:/Documenti/Tesi/Tesi_Generatore_onde_quadre/controllore/	//
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	5.9.0	/6f544dfc/
+DOWN	./controllore.ino	/^  DOWN,$/;"	e	enum:KEY_VAL	file:
+DOWN_VALUE	./controllore.ino	/^#define DOWN_VALUE /;"	d	file:
+KEYPAD_PIN	./controllore.ino	/^#define KEYPAD_PIN /;"	d	file:
+KEY_STATE	./controllore.ino	/^enum KEY_STATE {$/;"	g	file:
+KEY_UNKNOWN	./controllore.ino	/^  KEY_UNKNOWN = -1,$/;"	e	enum:KEY_VAL	file:
+KEY_VAL	./controllore.ino	/^enum KEY_VAL {$/;"	g	file:
+Key_Event	./controllore.ino	/^} Key_Event;$/;"	t	typeref:struct:__anonc1dead160108	file:
+LEFT	./controllore.ino	/^  LEFT,$/;"	e	enum:KEY_VAL	file:
+LEFT_VALUE	./controllore.ino	/^#define LEFT_VALUE /;"	d	file:
+PRESSED	./controllore.ino	/^  PRESSED,$/;"	e	enum:KEY_STATE	file:
+RELEASE	./controllore.ino	/^  RELEASE,$/;"	e	enum:KEY_VAL	file:
+RELEASED	./controllore.ino	/^  RELEASED,$/;"	e	enum:KEY_STATE	file:
+RELEASE_VALUE	./controllore.ino	/^#define RELEASE_VALUE /;"	d	file:
+RIGHT	./controllore.ino	/^  RIGHT,$/;"	e	enum:KEY_VAL	file:
+RIGHT_VALUE	./controllore.ino	/^#define RIGHT_VALUE /;"	d	file:
+SELECT	./controllore.ino	/^  SELECT,$/;"	e	enum:KEY_VAL	file:
+SELECT_VALUE	./controllore.ino	/^#define SELECT_VALUE /;"	d	file:
+State	./controllore.ino	/^struct State {$/;"	s	file:
+UP	./controllore.ino	/^  UP,$/;"	e	enum:KEY_VAL	file:
+UP_VALUE	./controllore.ino	/^#define UP_VALUE /;"	d	file:
+__anonc1dead160108	./controllore.ino	/^typedef struct {$/;"	s	file:
+button_state	./controllore.ino	/^void button_state() {$/;"	f	typeref:typename:void
+change_digit	./controllore.ino	/^inline void change_digit(unsigned int *num, bool decrease) {$/;"	f	typeref:typename:void
+create_from_digits	./controllore.ino	/^inline void create_from_digits(float *num) {$/;"	f	typeref:typename:void
+create_states	./controllore.ino	/^void inline create_states()$/;"	f	typeref:typename:void
+curr_key	./controllore.ino	/^KEY_VAL prev_key = KEY_UNKNOWN, curr_key = KEY_UNKNOWN;$/;"	v	typeref:typename:KEY_VAL
+current_state	./controllore.ino	/^State *current_state;$/;"	v	typeref:typename:State *
+current_time	./controllore.ino	/^double start_time, current_time;$/;"	v	typeref:typename:double
+decimals	./controllore.ino	/^unsigned int decimals = 0, units = 0, tens = 0, hundreds = 0;$/;"	v	typeref:typename:unsigned int
+decode_key	./controllore.ino	/^inline KEY_VAL decode_key(int value) {$/;"	f	typeref:typename:KEY_VAL
+duty_cycle	./controllore.ino	/^float duty_cycle;$/;"	v	typeref:typename:float
+frequency	./controllore.ino	/^float frequency, period, period_on;  \/\/ Hertz$/;"	v	typeref:typename:float
+hundreds	./controllore.ino	/^unsigned int decimals = 0, units = 0, tens = 0, hundreds = 0;$/;"	v	typeref:typename:unsigned int
+input	./controllore.ino	/^  void (*input)(void);$/;"	m	struct:State	typeref:typename:void (*)(void)	file:
+key	./controllore.ino	/^  KEY_VAL key;$/;"	m	struct:__anonc1dead160108	typeref:typename:KEY_VAL	file:
+key_an	./controllore.ino	/^int key_an;$/;"	v	typeref:typename:int
+key_event	./controllore.ino	/^Key_Event key_event {KEY_UNKNOWN, NULL};$/;"	v	typeref:typename:Key_Event
+lcd	./controllore.ino	/^LiquidCrystal lcd(8, 9, 4, 5, 6, 7);$/;"	v	typeref:typename:LiquidCrystal
+loop	./controllore.ino	/^void loop() {$/;"	f	typeref:typename:void
+need_render	./controllore.ino	/^bool need_render = true;$/;"	v	typeref:typename:bool
+period	./controllore.ino	/^float frequency, period, period_on;  \/\/ Hertz$/;"	v	typeref:typename:float
+period_on	./controllore.ino	/^float frequency, period, period_on;  \/\/ Hertz$/;"	v	typeref:typename:float
+prev_key	./controllore.ino	/^KEY_VAL prev_key = KEY_UNKNOWN, curr_key = KEY_UNKNOWN;$/;"	v	typeref:typename:KEY_VAL
+print	./controllore.ino	/^void print(const char *text, int row = 0, int col = 0) {$/;"	f	typeref:typename:void
+render	./controllore.ino	/^  void (*render)(void);$/;"	m	struct:State	typeref:typename:void (*)(void)	file:
+repetitions	./controllore.ino	/^float repetitions;$/;"	v	typeref:typename:float
+set_digits	./controllore.ino	/^void set_digits(float num_to_convert) {$/;"	f	typeref:typename:void
+setup	./controllore.ino	/^void setup() {$/;"	f	typeref:typename:void
+start_time	./controllore.ino	/^double start_time, current_time;$/;"	v	typeref:typename:double
+state	./controllore.ino	/^  KEY_STATE state;$/;"	m	struct:__anonc1dead160108	typeref:typename:KEY_STATE	file:
+state_change	./controllore.ino	/^void state_change(struct State *state) {$/;"	f	typeref:typename:void
+state_continuum	./controllore.ino	/^State *state_continuum;$/;"	v	typeref:typename:State *
+state_create	./controllore.ino	/^void state_create(struct State **state,$/;"	f	typeref:typename:void
+state_delete	./controllore.ino	/^void state_delete(struct State *state) {$/;"	f	typeref:typename:void
+state_memory	./controllore.ino	/^  void *state_memory;$/;"	m	struct:State	typeref:typename:void *	file:
+state_programmed	./controllore.ino	/^State *state_programmed;$/;"	v	typeref:typename:State *
+state_programmed_input	./controllore.ino	/^void state_programmed_input(){}$/;"	f	typeref:typename:void
+state_programmed_render	./controllore.ino	/^void state_programmed_render(){$/;"	f	typeref:typename:void
+state_ready	./controllore.ino	/^State *state_ready;$/;"	v	typeref:typename:State *
+state_ready_input	./controllore.ino	/^void state_ready_input() {$/;"	f	typeref:typename:void
+state_ready_render	./controllore.ino	/^void state_ready_render() {$/;"	f	typeref:typename:void
+state_reset	./controllore.ino	/^State *state_reset;$/;"	v	typeref:typename:State *
+state_reset_render	./controllore.ino	/^void state_reset_render() {$/;"	f	typeref:typename:void
+state_reset_update	./controllore.ino	/^void state_reset_update() {$/;"	f	typeref:typename:void
+state_set_parameters	./controllore.ino	/^State *state_set_parameters;$/;"	v	typeref:typename:State *
+state_show_parameters	./controllore.ino	/^State *state_show_parameters;$/;"	v	typeref:typename:State *
+state_start_continuum	./controllore.ino	/^State *state_start_continuum;$/;"	v	typeref:typename:State *
+state_start_programmed	./controllore.ino	/^State *state_start_programmed;$/;"	v	typeref:typename:State *
+state_started_continuum	./controllore.ino	/^State *state_started_continuum;$/;"	v	typeref:typename:State *
+state_started_programmed	./controllore.ino	/^State *state_started_programmed;$/;"	v	typeref:typename:State *
+state_stopped_continuum	./controllore.ino	/^State *state_stopped_continuum;$/;"	v	typeref:typename:State *
+state_stopped_programmed	./controllore.ino	/^State *state_stopped_programmed;$/;"	v	typeref:typename:State *
+tens	./controllore.ino	/^unsigned int decimals = 0, units = 0, tens = 0, hundreds = 0;$/;"	v	typeref:typename:unsigned int
+units	./controllore.ino	/^unsigned int decimals = 0, units = 0, tens = 0, hundreds = 0;$/;"	v	typeref:typename:unsigned int
+update	./controllore.ino	/^  void (*update)(void);$/;"	m	struct:State	typeref:typename:void (*)(void)	file:
