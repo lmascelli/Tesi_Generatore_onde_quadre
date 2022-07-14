@@ -1,4 +1,5 @@
 #include <LiquidCrystal.h>
+#include <assert.h>
 
 /****************************************
 
@@ -6,6 +7,7 @@
 
  ****************************************/
 
+#define LCD_COLS 20
 #define KEYPAD_PIN 0
 
 /****************************************
@@ -55,9 +57,12 @@ LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 
 
 // key
+#define KEY_THRESHOLD 100
 KEY_VAL key = KEY_UNKNOWN;
 KEY_STATE state = UNVALID;
 int key_an;
+KEY_VAL pinValue = KEY_UNKNOWN;
+unsigned long key_timer = 0, previous_time = 0;
 
 
 // render
@@ -72,8 +77,7 @@ float repetitions;
 
 
 // timing
-double start_time, current_time;
-
+unsigned long start_time, current_time;
 
 /****************************************
 
@@ -98,34 +102,44 @@ inline KEY_VAL decode_key(int value) {
     return KEY_UNKNOWN;
 }
 
-void button_state() {
+void readKeyVal(){
+  unsigned long now_time = millis();
   key_an = analogRead(KEYPAD_PIN);
-  KEY_VAL keyread = decode_key(key_an);
+  KEY_VAL readval = decode_key(key_an);
+  if (readval == pinValue){
+    key_timer += (now_time - previous_time);
+    Serial.println(key_timer);
+    if (key_timer > KEY_THRESHOLD)
+      button_state(pinValue);
+  } else {
+    pinValue = readval;
+    key_timer = 0;
+  }
+  previous_time = now_time;
+}
 
-// prevedere eventualmente un timer minimo di pressione ed un timer per 
-// still pressing
-  if (keyread == key) {
-    if (keyread == NONE)
+void button_state(KEY_VAL keyval) {
+  if (keyval == key) {
+    if (keyval == NONE)
       state=NO_KEY_PRESSED;
     else
       state=STILL_PRESSING;
   }
   else {
-    if (keyread == NONE){
+    if (keyval == NONE){
       state = RELEASED;
     } else {
-      key = keyread;
+      key = keyval;
       state = PRESSED;
     } 
   }
 }
 
-void print(const char *text, int row = 0, int col = 0) {
-  // TODO
-  // parse for newlines character
+void print(const char *text, int col = 0) {
+  assert(0 <= col && col < 20);
   if (need_render) {
     lcd.clear();
-    lcd.setCursor(row, col);
+    lcd.setCursor(col, 0);
     lcd.print(text);
     need_render = false;
   }
@@ -169,6 +183,8 @@ inline void change_digit(unsigned int *num, bool decrease) {
 
  ****************************************/
 
+// questa struttura era prevista per gestire casi molto generali ma per il 
+// progetto in corso potrebbe essere più semplice con tutto in update
 struct State {
   void (*input)(void);
   void (*update)(void);
@@ -212,14 +228,14 @@ State *state_ready;
 State *state_programmed;
 State *state_show_parameters;
 State *state_set_parameters;
-State *state_start_programmed;
-State *state_started_programmed;
-State *state_stopped_programmed;
+State *state_programmed_start;
+State *state_programmed_started;
+State *state_programmed_stopped;
 
 State *state_continuum;
-State *state_start_continuum;
-State *state_started_continuum;
-State *state_stopped_continuum;
+State *state_continuum_start;
+State *state_continuum_started;
+State *state_continuum_stopped;
 
 // STATE RESET
 
@@ -236,8 +252,6 @@ void state_reset_render() {
 void state_ready_input() {
   if (state == PRESSED) 
     switch(key){
-      case SELECT:
-        break;
       case UP:
         state_change(state_programmed);
         break;
@@ -248,7 +262,7 @@ void state_ready_input() {
 }
 
 void state_ready_render() {
-  print("READY");
+  print("READY", 1);
 }
 
 // STATE PROGRAMMED
@@ -256,6 +270,8 @@ void state_ready_render() {
 void state_programmed_input(){
   if (state==PRESSED)
     switch(key){
+      case SELECT:
+        state_change(state_show_parameters);
       case DOWN:
         state_change(state_ready);
         break;
@@ -266,8 +282,51 @@ void state_programmed_input(){
 }
 
 void state_programmed_render(){
-  print("PROGRAMMED\nSTIMULATION");
+  print("PROGRAMMED STIM");
 }
+
+// STATE PROGRAMMED START
+
+void state_programmed_start_input()
+{
+  if (state == PRESSED)
+    switch(key){
+      case SELECT:
+        state_change(state_programmed_started);
+        break;
+      case LEFT:
+        state_change(state_ready);
+        break;
+      case UP:
+        state_change(state_set_parameters);
+        break;
+      case DOWN:
+        state_change(state_show_parameters);
+        break;
+    }
+}
+
+void state_programmed_start_render()
+{
+  print("START STIMULATION?\n"
+      "SELECT TO START");
+}
+
+// STATE PROGRAMMED STARTED
+
+
+
+// STATE PROGRAMMED STOPPED
+
+
+
+// STATE SHOW PARAMETERS
+
+
+
+// STATE SET PARAMETERS
+
+
 
 // STATE CONTINUUM
 
@@ -286,6 +345,17 @@ void state_continuum_input(){
 void state_continuum_render(){
   print("CONTINUUM\n STIMULATION");
 }
+
+// STATE CONTINUUM START
+
+
+
+// STATE CONTINUUM STARTED
+
+
+
+// STATE CONTINUUM STOPPED
+
 
 /**************** states creation ***************/
 
@@ -311,10 +381,11 @@ void setup() {
   frequency = 1.0f;
   duty_cycle = 0.5f;
   repetitions = 10;
+  Serial.begin(9600);
 }
 
 void loop() {
-  button_state();
+  readKeyVal();
   if (current_state->input)
     current_state->input();
   if (current_state->render)
