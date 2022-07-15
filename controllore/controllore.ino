@@ -10,6 +10,8 @@
 #define LCD_COLS 20
 #define KEYPAD_PIN 0
 
+#define change_state(X) {need_render = true; current_state = X;}
+
 /****************************************
 
   ANALOG VALUE ASSOCIATED TO KEYS
@@ -68,12 +70,15 @@ unsigned long key_timer = 0, previous_time = 0;
 // render
 bool need_render = true;
 unsigned int decimals = 0, units = 0, tens = 0, hundreds = 0;
+unsigned long blink_timer, blink_period_on = 900, blink_period_off = 100;
 
 
-// stimulation parameters
+// programmed stimulation parameters
 float frequency, period, period_on;  // Hertz
 float duty_cycle;
-float repetitions;
+unsigned int total_repetitions, current_repetition;
+
+unsigned char show_param_index = 0, set_param_index = 0, set_param_digit = 0;
 
 
 // timing
@@ -84,6 +89,8 @@ unsigned long start_time, current_time;
   UTILITY FUNCTIONS
 
  ****************************************/
+
+/**************** LCD ******************/
 
 inline KEY_VAL decode_key(int value) {
   if (value > RELEASE_VALUE)
@@ -145,12 +152,14 @@ void print(const char *text, int col = 0) {
   }
 }
 
+/**************** DIGITS ******************/
+
 inline void create_from_digits(float *num) {
   *num = 100 * hundreds + 10 * tens + units + 0.1f * decimals;
   need_render = true;
 }
 
-void set_digits(float num_to_convert) {
+inline void set_digits(float num_to_convert) {
   if (num_to_convert > 999.9)
     return;
   int num = (int)(num_to_convert * 10);
@@ -183,192 +192,267 @@ inline void change_digit(unsigned int *num, bool decrease) {
 
  ****************************************/
 
-// questa struttura era prevista per gestire casi molto generali ma per il 
-// progetto in corso potrebbe essere più semplice con tutto in update
-struct State {
-  void (*input)(void);
-  void (*update)(void);
-  void (*render)(void);
-  void *state_memory;
-};
+typedef void (*State)(void);
 
-State *current_state;
-
-
-/******************** state utility functions ****************/
-
-void state_create(struct State **state,
-    void (*update_func)(void) = NULL,
-    void (*input_func)(void) = NULL,
-    void (*render_func)(void) = NULL,
-    unsigned int memory = 0) {
-  (*state) = (State *)malloc(sizeof(State));
-  (*state)->update = update_func;
-  (*state)->input = input_func;
-  (*state)->render = render_func;
-  (*state)->state_memory = malloc(memory);
-}
-
-void state_delete(struct State *state) {
-  free(state->state_memory);
-  free(state);
-}
-
-// Probably unnecessary
-void state_change(struct State *state, bool render = true) {
-  need_render = render;
-  current_state = state;
-}
-
-/******************** state pointers ********************/
-
-State *state_reset;
-State *state_ready;
-
-State *state_programmed;
-State *state_show_parameters;
-State *state_set_parameters;
-State *state_programmed_start;
-State *state_programmed_started;
-State *state_programmed_stopped;
-
-State *state_continuum;
-State *state_continuum_start;
-State *state_continuum_started;
-State *state_continuum_stopped;
+State current_state;
 
 // STATE RESET
 
-void state_reset_update() {
-  state_change(state_ready);
+void state_reset() {
+  print("RESET");
+  delay(1000);
+  change_state(state_ready);
 };
 
-void state_reset_render() {
-  print("RESET");
-}
 
 // STATE READY
 
-void state_ready_input() {
+void state_ready() {
+  print("READY");
+
   if (state == PRESSED) 
     switch(key){
       case UP:
-        state_change(state_programmed);
+        change_state(state_programmed);
         break;
       case DOWN:
-        state_change(state_continuum);
+        change_state(state_continuum);
         break;
     }
-}
-
-void state_ready_render() {
-  print("READY", 1);
 }
 
 // STATE PROGRAMMED
 
-void state_programmed_input(){
+void state_programmed(){
+  print("PROGRAMMED STIM");
+
   if (state==PRESSED)
     switch(key){
       case SELECT:
-        state_change(state_show_parameters);
+      case RIGHT:
+        change_state(state_show_parameters);
+        break;
       case DOWN:
-        state_change(state_ready);
+        change_state(state_ready);
         break;
       case UP:
-        state_change(state_continuum);
+        change_state(state_continuum);
         break;
     }
-}
-
-void state_programmed_render(){
-  print("PROGRAMMED STIM");
 }
 
 // STATE PROGRAMMED START
 
-void state_programmed_start_input()
+void state_programmed_start()
 {
+  print("SELECT TO START");
   if (state == PRESSED)
     switch(key){
       case SELECT:
-        state_change(state_programmed_started);
+        current_repetition = 0;
+        current_time = 0;
+        change_state(state_programmed_started);
         break;
       case LEFT:
-        state_change(state_ready);
+        change_state(state_ready);
         break;
       case UP:
-        state_change(state_set_parameters);
+        change_state(state_set_parameters);
         break;
       case DOWN:
-        state_change(state_show_parameters);
+        change_state(state_show_parameters);
         break;
     }
-}
-
-void state_programmed_start_render()
-{
-  print("START STIMULATION?\n"
-      "SELECT TO START");
 }
 
 // STATE PROGRAMMED STARTED
 
+void state_programmed_started()
+{
+  String text = "REP :" + String(current_repetition)
+    + "/" + String(total_repetitions);
+  print(text.c_str());
 
+  // stimulation handling
 
-// STATE PROGRAMMED STOPPED
-
-
-
-// STATE SHOW PARAMETERS
-
-
-
-// STATE SET PARAMETERS
-
-
-
-// STATE CONTINUUM
-
-void state_continuum_input(){
-  if (state==PRESSED)
+  if (state == PRESSED)
     switch(key){
-      case UP:
-        state_change(state_ready);
-        break;
-      case DOWN:
-        state_change(state_programmed);
+      case SELECT:
+        change_state(state_programmed_stopped);
         break;
     }
 }
 
-void state_continuum_render(){
-  print("CONTINUUM\n STIMULATION");
+
+// STATE PROGRAMMED STOPPED
+
+void state_programmed_stopped()
+{
+  print("SELECT TO RESUME");
+
+  if (state == PRESSED)
+    switch(key){
+      case SELECT:
+        change_state(state_programmed_started);
+        break;
+    }
+}
+
+
+// STATE SHOW PARAMETERS
+
+void state_show_parameters(){
+  print("SHOW PARAMETERS");
+  if (state == PRESSED)
+    switch(key){
+      case SELECT:
+      case RIGHT:
+        show_param_index = 0;
+        change_state(state_showing_parameters);
+        break;
+      case UP:
+        change_state(state_programmed_start);
+        break;
+      case DOWN:
+        change_state(state_set_parameters);
+        break;
+      case LEFT:
+        change_state(state_ready);
+        break;
+    }
+}
+
+// STATE SHOWING PARAMETERS
+
+void state_showing_parameters(){
+  String text;
+  switch(show_param_index)
+  {
+    case 0:
+      text = "TOT PERIOD: " + period;
+      break;
+    case 1:
+      text = "ON PERIOD: " + period_on;
+      break;
+    case 2:
+      text = "N° RIPET: " + total_repetitions;
+      break;
+  }
+  print(text);
+
+  if (state == PRESSED)
+    switch(key){
+      case LEFT:
+        change_state(state_show_parameters);
+        break;
+      default:
+        show_param_index++;
+        show_param_index %= 3;
+    }
+}
+
+// STATE SET PARAMETERS
+
+void state_set_parameters(){
+  print ("SET PARAMETERS");
+
+  if (state == PRESSED)
+    switch(key){
+      case SELECT:
+      case RIGHT:
+        set_param_index = 0;
+        set_param_digit = 0;
+        blink_timer = millis();
+        change_state(state_setting_parameters);
+        break;
+      case UP:
+        change_state(state_show_parameters);
+        break;
+      case DOWN:
+        change_state(state_programmed_start);
+        break;
+      case LEFT:
+        change_state(state_ready);
+        break;
+    }
+}
+
+// STATE SETTING PARAMETERS
+
+void state_setting_parameters(){
+  String text;
+  switch(set_param_index){
+    case 0:
+      text = "TOT PERIOD: ";
+      set_digits(period);
+      break;
+    case 1:
+      text = "ON PERIOD: ";
+      set_digits(period_on);
+      break;
+    case 2:
+      text = "N° RIPET: ";
+      set_digits(total_repetitions);
+      break;
+  }
+  for (unsigned int i=0; i<3; i++){
+    if (i == set_param_digit){
+
+    } else {
+
+    }
+  }
+}
+
+// STATE CONTINUUM
+
+void state_continuum(){
+  print("CONTINUUM STIM");
+
+  if (state==PRESSED)
+    switch(key){
+      case SELECT:
+      case RIGHT:
+        change_state(state_continuum_start);
+        break;
+      case UP:
+        change_state(state_ready);
+        break;
+      case DOWN:
+        change_state(state_programmed);
+        break;
+    }
 }
 
 // STATE CONTINUUM START
 
+void state_continuum_start(){
+  print("SELECT TO START");
 
+  if (state == PRESSED)
+    switch(key){
+      case SELECT:
+        change_state(state_continuum_started);
+        break;
+      case LEFT:
+        change_state(state_continuum);
+        break;
+    }
+}
 
 // STATE CONTINUUM STARTED
 
+void state_continuum_started(){
+  print ("SELECT TO STOP");
 
-
-// STATE CONTINUUM STOPPED
-
-
-/**************** states creation ***************/
-
-void inline create_states()
-{
-  state_create(&state_reset, state_reset_update, nullptr, state_reset_render, 0);
-  state_create(&state_ready, nullptr, state_ready_input, state_ready_render, 0);
-  state_create(&state_programmed, nullptr, state_programmed_input,
-      state_programmed_render, 0);
-  state_create(&state_continuum, nullptr, state_continuum_input,
-      state_continuum_render, 0);
-  current_state = state_reset;
+  if (state == PRESSED)
+    switch(key){
+      case SELECT:
+        change_state(state_continuum_start);
+        break;
+    }
 }
+
 
 /****************************************
 
@@ -377,19 +461,17 @@ void inline create_states()
  ****************************************/
 
 void setup() {
-  create_states();
   frequency = 1.0f;
+  period = 1./frequency;
   duty_cycle = 0.5f;
-  repetitions = 10;
+  period_on = period * duty_cycle;
+  total_repetitions = 10;
+  current_state = state_reset;
   Serial.begin(9600);
 }
 
 void loop() {
   readKeyVal();
-  if (current_state->input)
-    current_state->input();
-  if (current_state->render)
-    current_state->render();
-  if (current_state->update)
-    current_state->update();
+  current_state();
 }
+
