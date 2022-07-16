@@ -9,6 +9,7 @@
 
 #define LCD_COLS 20
 #define KEYPAD_PIN 0
+#define OUT_PIN LED_BUILTIN
 
 #define change_state(X) {need_render = true; current_state = X;}
 
@@ -74,6 +75,9 @@ unsigned long blink_timer, blink_period_on = 900, blink_period_off = 100;
 
 
 // programmed stimulation parameters
+
+bool stimulation_on = false;
+
 float frequency, period, period_on;  // Hertz
 float duty_cycle;
 unsigned int total_repetitions, current_repetition;
@@ -82,7 +86,7 @@ unsigned char show_param_index = 0, set_param_index = 0, set_param_digit = 0;
 
 
 // timing
-unsigned long start_time, current_time;
+unsigned long stim_period_start;
 
 /****************************************
 
@@ -250,11 +254,10 @@ void state_programmed_start()
     switch(key){
       case SELECT:
         current_repetition = 0;
-        current_time = 0;
         change_state(state_programmed_started);
         break;
       case LEFT:
-        change_state(state_ready);
+        change_state(state_programmed);
         break;
       case UP:
         change_state(state_set_parameters);
@@ -317,7 +320,7 @@ void state_show_parameters(){
         change_state(state_set_parameters);
         break;
       case LEFT:
-        change_state(state_ready);
+        change_state(state_programmed);
         break;
     }
 }
@@ -329,25 +332,32 @@ void state_showing_parameters(){
   switch(show_param_index)
   {
     case 0:
-      text = "TOT PERIOD: " + period;
+      text = "TOT PERIOD: " + String(period);
       break;
     case 1:
-      text = "ON PERIOD: " + period_on;
+      text = "ON PERIOD: " + String(period_on);
       break;
     case 2:
-      text = "N° RIPET: " + total_repetitions;
+      text = "NUM RIPET: " + String(total_repetitions);
       break;
   }
-  print(text);
+  print(text.c_str());
 
   if (state == PRESSED)
     switch(key){
       case LEFT:
         change_state(state_show_parameters);
         break;
-      default:
+      case UP:
+        show_param_index--;
+        show_param_index = show_param_index < 0 ? 2 : show_param_index;
+        need_render = true;
+        break;
+      case DOWN:
         show_param_index++;
-        show_param_index %= 3;
+        show_param_index = show_param_index > 2 ? 0 : show_param_index;
+        need_render = true;
+        break;
     }
 }
 
@@ -372,7 +382,7 @@ void state_set_parameters(){
         change_state(state_programmed_start);
         break;
       case LEFT:
-        change_state(state_ready);
+        change_state(state_programmed);
         break;
     }
 }
@@ -433,6 +443,9 @@ void state_continuum_start(){
     switch(key){
       case SELECT:
         change_state(state_continuum_started);
+        stim_period_start = millis();
+        digitalWrite(OUT_PIN, HIGH);
+        stimulation_on = true;
         break;
       case LEFT:
         change_state(state_continuum);
@@ -445,9 +458,25 @@ void state_continuum_start(){
 void state_continuum_started(){
   print ("SELECT TO STOP");
 
+  // ----- stimulation logic
+
+  unsigned long elapsed = millis() - stim_period_start;
+  if (elapsed > period) {
+    stim_period_start = millis();
+    digitalWrite(OUT_PIN, HIGH);
+    stimulation_on = true;
+  } else if (elapsed > period_on and stimulation_on) {
+    digitalWrite(OUT_PIN, LOW);
+    stimulation_on = false;
+  }
+
+  // ----- end stimulation logic
+
   if (state == PRESSED)
     switch(key){
       case SELECT:
+        digitalWrite(OUT_PIN, LOW);
+        stimulation_on = false;
         change_state(state_continuum_start);
         break;
     }
@@ -462,11 +491,12 @@ void state_continuum_started(){
 
 void setup() {
   frequency = 1.0f;
-  period = 1./frequency;
+  period = 1000./frequency;
   duty_cycle = 0.5f;
   period_on = period * duty_cycle;
   total_repetitions = 10;
   current_state = state_reset;
+  pinMode(OUT_PIN, OUTPUT);
   Serial.begin(9600);
 }
 
