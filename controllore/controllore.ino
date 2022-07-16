@@ -70,7 +70,14 @@ unsigned long key_timer = 0, previous_time = 0;
 
 // render
 bool need_render = true;
-unsigned int decimals = 0, units = 0, tens = 0, hundreds = 0;
+
+// es. 1234
+// digits[0] = 1;
+// digits[1] = 2;
+// digits[2] = 3;
+// digits[3] = 4;
+unsigned char digits[4] = {0}; 
+
 unsigned long blink_timer, blink_period_on = 900, blink_period_off = 100;
 
 
@@ -158,22 +165,29 @@ void print(const char *text, int col = 0) {
 
 /**************** DIGITS ******************/
 
-inline void create_from_digits(float *num) {
-  *num = 100 * hundreds + 10 * tens + units + 0.1f * decimals;
+void create_from_digits(float *num, unsigned int scale = 10) {
+  *num = scale * (        digits[0] +
+                  1e-1f * digits[1] + 
+                  1e-2f * digits[2] +
+                  1e-3f * digits[3]);
+
   need_render = true;
 }
 
-inline void set_digits(float num_to_convert) {
-  if (num_to_convert > 999.9)
+inline void set_digits(float num_to_convert, unsigned int decimals = 1) {
+  if (num_to_convert > 10 * scale)
     return;
-  int num = (int)(num_to_convert * 10);
-  decimals = num % 10;
+  unsigned int scale = 1;
+  for (unsigned int i=decimals; i>1; i++)
+    scale *= 10;
+  unsigned int num = (unsigned int)(num_to_convert * scale);
+  digits[3] = num % 10;
   num = num / 10;
-  units = num % 10;
+  digits[2] = num % 10;
   num = num / 10;
-  tens = num % 10;
+  digits[1] = num % 10;
   num = num / 10;
-  hundreds = num % 10;
+  digits[0] = num % 10;
 }
 
 inline void change_digit(unsigned int *num, bool decrease) {
