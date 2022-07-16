@@ -253,8 +253,11 @@ void state_programmed_start()
   if (state == PRESSED)
     switch(key){
       case SELECT:
-        current_repetition = 0;
+        current_repetition = 1;
         change_state(state_programmed_started);
+        stimulation_on = true;
+        stim_period_start = millis();
+        digitalWrite(OUT_PIN, HIGH);
         break;
       case LEFT:
         change_state(state_programmed);
@@ -276,7 +279,27 @@ void state_programmed_started()
     + "/" + String(total_repetitions);
   print(text.c_str());
 
-  // stimulation handling
+  // ----- stimulation logic
+
+  if (current_repetition <= total_repetitions) {
+    unsigned long elapsed = millis() - stim_period_start;
+    if (elapsed > period) {
+      stim_period_start = millis();
+      digitalWrite(OUT_PIN, HIGH);
+      stimulation_on = true;
+      current_repetition++;
+      need_render = true;
+    } else if (elapsed > period_on and stimulation_on) {
+      digitalWrite(OUT_PIN, LOW);
+      stimulation_on = false;
+    }
+  } else {
+    digitalWrite(OUT_PIN, LOW);
+    stimulation_on = false;
+    change_state(state_programmed_start);
+  }
+
+  // ----- end stimulation logic
 
   if (state == PRESSED)
     switch(key){
@@ -443,9 +466,9 @@ void state_continuum_start(){
     switch(key){
       case SELECT:
         change_state(state_continuum_started);
+        stimulation_on = true;
         stim_period_start = millis();
         digitalWrite(OUT_PIN, HIGH);
-        stimulation_on = true;
         break;
       case LEFT:
         change_state(state_continuum);
