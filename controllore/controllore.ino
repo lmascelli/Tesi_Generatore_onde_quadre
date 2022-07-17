@@ -78,7 +78,7 @@ bool need_render = true;
 // digits[3] = 4;
 unsigned char digits[4] = {0}; 
 
-unsigned long blink_timer, blink_period_on = 900, blink_period_off = 100;
+unsigned long blink_timer, blink_period_on = 900, blink_period_tot = 1000;
 
 
 // programmed stimulation parameters
@@ -89,7 +89,7 @@ float frequency, period, period_on;  // Hertz
 float duty_cycle;
 unsigned int total_repetitions, current_repetition;
 
-unsigned char show_param_index = 0, set_param_index = 0, set_param_digit = 0;
+char show_param_index = 0, set_param_index = 0, set_param_digit = 0;
 
 
 // timing
@@ -427,6 +427,9 @@ void state_set_parameters(){
 // STATE SETTING PARAMETERS
 
 void state_setting_parameters(){
+
+// creating current parameter value
+
   String text;
   switch(set_param_index){
     case 0:
@@ -444,12 +447,47 @@ void state_setting_parameters(){
   }
   for (unsigned int i=0; i<3; i++){
     if (i == set_param_digit){
-
+      unsigned long elapsed = millis() - blink_timer;
+      if (elapsed < blink_period_on) {
+        text += String(digits[i]);
+      } else if (elapsed < blink_period_tot){
+        text += " ";
+      } else {
+        blink_timer = millis();
+      }
     } else {
-
+        text += String(digits[i]);
     }
   }
+// end creating current parameter value
+
+  print(text.c_str());
+
+  if (state == PRESSED)
+    switch(key){
+      case SELECT:
+        change_state(state_set_parameters);
+        break;
+      case UP:
+        set_param_index--;
+        if (set_param_index == 3) set_param_index = 0;
+        break;
+      case DOWN:
+        set_param_index++;
+        if (set_param_index == -1) set_param_index = 2;
+        break;
+      case LEFT:
+        set_param_digit--;
+        if (set_param_digit == -1) set_param_digit = 3;
+        break;
+      case RIGHT:
+        set_param_digit++;
+        if (set_param_digit == 4) set_param_digit = 0;
+        break;
+    }
+
 }
+
 
 // STATE CONTINUUM
 
